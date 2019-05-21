@@ -12,6 +12,8 @@ import (
 
 var (
 	width = flag.Int("width", 80, "max width of a line, not including non-text prefix")
+	dash  = flag.Bool("dash", false, "merge lines that start with a dash (\"-\")")
+	star  = flag.Bool("star", false, "merge lines that start with an asterisk (\"*\")")
 )
 
 func main() {
@@ -28,8 +30,16 @@ func main() {
 	}
 
 	config := xfmt.Config{
-		MaxWidth: *width,
+		MaxWidth:      *width,
+		BreakPrefixes: []string{},
 	}
+	if !*dash {
+		config.BreakPrefixes = append(config.BreakPrefixes, "- ")
+	}
+	if !*star {
+		config.BreakPrefixes = append(config.BreakPrefixes, "* ")
+	}
+
 	err := xfmt.Format(os.Stdout, os.Stdin, config)
 	if err != nil {
 		log.Fatalf("format: %s", err)

@@ -1,0 +1,2 @@
+// Format reads text from r and writes reformatted text to w, according to
+// instructions in config. Lines ending with \r\n are formatted with \r\n as well.

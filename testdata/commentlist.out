@@ -1,0 +1,8 @@
+// Items in a list:
+// - Xfmt wraps long lines at 80 characters, configurable through -width. But it
+// counts text width excluding indenting and markup. Fmt formats to a max line
+// length that includes indenting. We don't care about total max line length
+// nowadays, we care about a human readable paragraph, which has a certain text
+// width regardless of indent.
+// - Xfmt recognizes lines with first non-whitespace of "//" and "#" as line
+// comments, and repeats that prefix on later lines.

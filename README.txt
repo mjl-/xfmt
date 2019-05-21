@@ -23,3 +23,4 @@ Xfmt does not merge multiple spaces, it assumes you intended what you typed.
 # todo
 
 - possibly recognize itemized lists in comments and indent the later lines with whitespace
+- something else

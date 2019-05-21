@@ -10,10 +10,12 @@ import (
 
 // Config tells format how to reformat text.
 type Config struct {
-	MaxWidth int // Max width of content (excluding indenting), after which lines are wrapped.
+	MaxWidth      int      // Max width of content (excluding indenting), after which lines are wrapped.
+	BreakPrefixes []string // String prefixes that cause a line to break, instead of being merged into the previous line.
 }
 
-// Format reads text from r and writes reformatted text to w, according to instructions in config.
+// Format reads text from r and writes reformatted text to w, according to
+// instructions in config. Lines ending with \r\n are formatted with \r\n as well.
 func Format(w io.Writer, r io.Reader, config Config) error {
 	f := &formatter{
 		in:     bufio.NewReader(r),
@@ -115,7 +117,13 @@ func (f *formatter) gatherLine() (string, string) {
 			curLineend = end
 		}
 		prefix, rem := parseLine(line)
-		if curLine != "" && (curPrefix != prefix || rem == "" || startsWithNonText(rem)) {
+		if prefix == "" && rem == "" {
+			if curLine == "" {
+				f.consumeLine()
+			}
+			break
+		}
+		if curLine != "" && (curPrefix != prefix || rem == "" || f.causeBreak(rem)) {
 			break
 		}
 		curPrefix = prefix
@@ -124,14 +132,37 @@ func (f *formatter) gatherLine() (string, string) {
 		}
 		curLine += rem
 		f.consumeLine()
+		// Control at begin or end of line are not merged.
+		if curLine != "" && curLine[len(curLine)-1] < 0x20 {
+			break
+		}
 	}
 
 	return curPrefix + curLine, curLineend
 }
 
-func startsWithNonText(s string) bool {
+func (f *formatter) causeBreak(s string) bool {
 	c := s[0]
-	return c < 0x80 && !(c >= 'A' && c < 'Z') && !(c >= 'a' && c <= 'z')
+	if c < 0x20 {
+		return true
+	}
+	for _, ss := range f.config.BreakPrefixes {
+		if strings.HasPrefix(s, ss) {
+			return true
+		}
+	}
+
+	// Don't merge lines starting with eg "1. ".
+	for i, c := range s {
+		if c >= '0' && c <= '9' {
+			continue
+		}
+		if i > 0 && c == '.' && strings.HasPrefix(s[i:], ". ") {
+			return true
+		}
+		break
+	}
+	return false
 }
 
 func parseLine(s string) (string, string) {
