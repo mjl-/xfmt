@@ -11,7 +11,7 @@ import (
 // Config tells format how to reformat text.
 type Config struct {
 	// Max width of content (excluding indenting), after which lines are wrapped.
-	MaxWidth      int
+	MaxWidth int
 
 	// String prefixes that cause a line to break, instead of being merged into the
 	// previous line.
@@ -37,7 +37,7 @@ type formatter struct {
 	curLineend string
 }
 
-type parseError error
+type parseError struct{ error }
 
 func (f *formatter) format() (rerr error) {
 	defer func() {
@@ -69,7 +69,7 @@ func (f *formatter) format() (rerr error) {
 
 func (f *formatter) check(err error, action string) {
 	if err != nil {
-		panic(parseError(fmt.Errorf("%s: %s", action, err)))
+		panic(parseError{fmt.Errorf("%s: %s", action, err)})
 	}
 }
 
