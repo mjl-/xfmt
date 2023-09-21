@@ -3,14 +3,13 @@ package xfmt
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
 )
 
 func TestXfmt(t *testing.T) {
-	files, err := ioutil.ReadDir("testdata")
+	files, err := os.ReadDir("testdata")
 	if err != nil {
 		t.Fatalf("reading testdata/: %s", err)
 	}
@@ -27,7 +26,7 @@ func TestXfmt(t *testing.T) {
 
 		func() {
 			outName := "testdata/" + strings.TrimSuffix(f.Name(), ".in") + ".out"
-			want, err := ioutil.ReadFile(outName)
+			want, err := os.ReadFile(outName)
 			if err != nil {
 				t.Errorf("read output file: %s", err)
 				return
